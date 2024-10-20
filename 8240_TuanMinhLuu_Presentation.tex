@@ -1,0 +1,201 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+
+\title{Reproducing FastText Sentiment Analysis}
+\subtitle{Using VADER Sentiment }
+\author{Tuan Minh Luu}
+\institute{Macquarie University}
+\date{\today}
+
+\usepackage{listings}  % For code listings
+\usepackage{hyperref}  % For hyperlinks
+\usepackage{graphicx}  % For including images
+\usepackage{color}
+\usepackage{amsmath}   % For mathematical symbols
+
+% Customize listings
+\lstset{
+    basicstyle=\ttfamily\small,  % Typewriter font for code
+    breaklines=true,              % Wrap long lines
+    keywordstyle=\color{blue},    % Style for keywords
+    commentstyle=\color{green},   % Style for comments
+    stringstyle=\color{red},      % Style for strings
+    frame=single,                 % Add frame around the code
+    showstringspaces=false,       % Do not show spaces in strings
+}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Table of contents
+\begin{frame}
+    \frametitle{Outline}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Introduction}
+    In this presentation, we describe the sentiment analysis project using FastText. The tasks involved include:
+    \begin{itemize}
+                \item Preprocessing and cleaning the BBC news dataset.
+    \item Applying VADER sentiment analysis.
+    \item Training a FastText model.
+    \item Improving model performance with hyperparameter tuning.
+    \item Balancing the dataset and re-evaluating the model.
+    \end{itemize}
+    
+\end{frame}
+
+\section{Replication of Original Work}
+\begin{frame}
+    \frametitle{Replication of Original Work}
+   In this project, we replicated the original work on sentiment analysis  using the fastText library developed by Facebook AI Re-search team.
+\end{frame}
+
+
+\section{Data Pre-processing}
+\begin{frame}{Data Preprocessing}
+The preprocessing steps applied to the dataset were as follows:
+\begin{itemize}
+\item Lowercasing and removing special characters.
+        \item Removing stop words using the NLTK library.
+\item Lemmatizing text to its root form.
+
+\end{itemize}
+\vspace{0.5cm}
+The cleaned data columns include:
+\begin{itemize}
+    \item Title cleaned.
+    \item Description cleaned.
+    \item Combined sentiment (using VADER analysis).
+\end{itemize}
+
+\end{frame}
+
+\section{Model Training and Evaluation}
+\begin{frame}[fragile]{Model Training and Evaluation}
+We utilized \texttt{FastText} for the training and evaluation process:
+\begin{itemize}
+    \item\textbf{Training Parameters:}
+\begin{lstlisting}[language=python]
+model = fasttext.train_supervised(
+        input ='bbc_news_train_combined.txt',       l.r=1.0, epoch=25,wordNgram=2,                  minCount=1, verbose=2)
+\end{lstlisting}
+\item \textbf{Evaluation Result:}
+        \begin{itemize}
+            \item Precision: 73.68\%
+            \item Racall: 73.68\%
+            \item Confusion Matrix: Highlighted True Positive and False Negative.
+        \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Hyperparameter Tuning}
+\begin{frame}{Hyperparameter Tuning}
+A grid search approach was employed for hyperparameter tuning:
+\begin{itemize}
+    \item Learning rates: 0.01, 0.05, 0.1
+    \item Epochs: 25, 50
+    \item WordNgrams: 1, 2
+    \item Embedding Dimensions: 50, 100
+\end{itemize}
+\vspace{0.5cm}
+The best model achieved a precision of 0.733 using:
+\begin{itemize}
+    \item Learning rates: 0.01
+    \item Epochs: 50
+    \item WordNgrams: 2
+    \item Embedding dimension: 100
+\end{itemize}
+The result of the best model is lower than the official model.
+\end{frame}
+
+\section{Dataset Balancing}
+\begin{frame}{Dataset Balancing}
+Oversampling techniques were applied to balance the neutral class, avoid bias in model training. Class distribution after oversampling:
+\begin{itemize}
+    \item Negative: 17801
+    \item Positive: 14401
+    \item Neutral: 14401
+\end{itemize}
+Model trained on the balanced dataset achieved a precision of 98.1\%.
+\end{frame}
+
+\section{Comparison of Results}
+\begin{frame}[fragile]
+    \frametitle{Comparison of Model Results}
+    We compared the results of our trained model with the official fastText models using **precision** as the evaluation metric:
+
+    \begin{lstlisting}[language=python]
+    test\_data['balanced\_predictions'] = test\_data['text\_only'].apply(lambda x: balanced\_model.predict(x)[0][0])
+    \end{lstlisting}
+
+    \begin{itemize}
+        \item \textbf{Our Model:} Precision = 98.1\%
+        \item \textbf{Official Model}: Precision = 73.68\%
+        \item \textbf{Official Model with hyperparameter:} Precision = 73.39\%
+    \end{itemize}
+    
+    \textbf{Precision} was chosen as it measures the proportion of correctly identified languages out of the total predicted. It is a crucial metric when accuracy alone doesn't capture performance in multi-class classification.
+\end{frame}
+
+\section{Model Utilities}
+\begin{frame}{Model Utilities}
+    The FastText-based sentiment analysis model offers several key utilities:
+    \begin{itemize}
+        \item \textbf{Efficient Sentiment Analysis:} Automates the classification of news articles, providing quick and scalable sentiment analysis for large datasets.
+        \item \textbf{Real-Time Classification:} FastText allows for real-time sentiment detection, which is crucial for media monitoring platforms and sentiment-based recommendations.
+        \item \textbf{Balanced Dataset Approach:} By employing oversampling, the model handles underrepresented classes effectively, ensuring reliable results across sentiment categories.
+        \item \textbf{Generalizability Across Topics:} Demonstrates effective sentiment classification across diverse news topics, useful for media analysts and researchers.
+        \item \textbf{Practical Applications for Media Organizations:} Helps automate content tagging, monitor sentiment trends, and analyze public opinion in real-time.
+    \end{itemize}
+\end{frame}
+
+\section{Model Limitations and Future Improvements}
+\begin{frame}{Model Limitations and Future Improvements}
+    Despite achieving high accuracy, the model exhibits several limitations:
+    \begin{itemize}
+        \item \textbf{Overfitting Risk:} High accuracy on the test set could indicate overfitting, especially when the training and testing datasets are closely related.
+        \item \textbf{Imbalance in Sentiment Classes:} Although oversampling was employed, the model may still face challenges in identifying minority classes like neutral sentiments.
+        \item \textbf{Handling Ambiguous Sentiments:} The model struggles with articles that have mixed or subtle sentiments, leading to misclassification in cases where sentiments are not clear-cut.
+        \item \textbf{VADER Limitations:} Using VADER as the sentiment analysis base might be insufficient for complex language structures, leading to inaccuracies in cases involving nuanced language.
+    \end{itemize}
+\end{frame}
+
+\section{Incorporating Techniques and Tools}
+\begin{frame}
+    \frametitle{Incorporating Techniques and Tools}
+    This project effectively utilized various techniques and tools to accomplish sentiment analysis on the BBC news dataset:
+
+    \begin{itemize}
+        \item \textbf{FastText for Text Classification:} Leveraged the FastText library for efficient model training and hyperparameter tuning to perform text classification tasks.
+        \item \textbf{Data Cleaning and Preprocessing:} Employed regular expressions, NLTK’s stopwords, and VADER sentiment analysis to clean and preprocess text data effectively.
+        \item \textbf{LaTeX for Presentation:} The entire presentation, including code listings, was written using LaTeX.
+        \item \textbf{Google Colab for Execution:} Leveraged Google Colab’s cloud-based environment for running and testing large-scale experiments conveniently.
+    \end{itemize}
+\end{frame}
+\section{Conclusion}
+\begin{frame}
+    \frametitle{Conclusion}
+    \textbf{Key Takeaways:}
+    \begin{itemize}
+\begin{itemize}
+    \item \textbf{Improved Sentiment Classification:} Achieved high precision through effective preprocessing and FastText training.
+    \item \textbf{Class Imbalance Addressed:} Applied oversampling to enhance model accuracy, particularly for neutral sentiments.
+    \item \textbf{Thorough Data Cleaning:} Used stopword removal, lemmatization, and filtering to refine sentiment predictions.
+\end{itemize}
+    \end{itemize}
+
+    \vspace{0.4cm}
+    \textbf{GitHub Repository:}
+    The repository contains:
+    \begin{itemize}
+        \item Python scripts for data cleaning and model training, training on balanced datasets and tuning hyperparameters.
+        \item Instructions on reproducing results and applying improvements.
+    \end{itemize}
+\end{frame}
+\end{document}
